@@ -64,7 +64,7 @@ void extract_xsec() {
 	TString PathToXSec = "./";
 	vector <TString> xsec_file;
 
-	xsec_file.push_back(PathToXSec+"xsec_carbon12_spline_EMPlusMEC_GTEST19_10b_00_000.root");
+	xsec_file.push_back("/pnfs/uboone/persistent/users/apapadop/GENIETweakedSamples/v3_6_0_GEM21_11b_00_000_EM/11_1000060120_EM_v3_6_0_GEM21_11b_00_000.xml.root");
 //	xsec_file.push_back(PathToXSec+"xsec_oxygen16_spline_EMPlusMEC_GTEST19_10b_00_000.root"); 
 //	xsec_file.push_back(PathToXSec+"xsec_argon40_spline_EMPlusMEC_GTEST19_10b_00_000.root");
 //	xsec_file.push_back(PathToXSec+"xsec_calcium40_spline_EMPlusMEC_GTEST19_10b_00_000.root"); 
@@ -79,7 +79,7 @@ void extract_xsec() {
 //	xsec_Eventfile.push_back(PathToSimSamples+"carbon12_EMPlusMEC_G18_02a_00_000_E_0_320_GeV_1M_master.root");
 //	xsec_Eventfile.push_back(PathToSimSamples+"carbon12_EMPlusMEC_G18_02a_00_000_E_0_560_GeV_1M_master.root");
 //	xsec_Eventfile.push_back(PathToSimSamples+"carbon12_EMPlusMEC_G18_02a_00_000_E_0_680_GeV_1M_master.root");
-	xsec_Eventfile.push_back(PathToSimSamples+"carbon12_EMPlusMEC_G18_02a_00_000_E_0_961_GeV_1M_master.root");
+	xsec_Eventfile.push_back("/pnfs/uboone/persistent/users/apapadop/GENIETweakedSamples/v3_6_0_GEM21_11b_00_000_EM/11_1000060120_EM_v3_6_0_GEM21_11b_00_000.gst.root");
 //	xsec_Eventfile.push_back(PathToSimSamples+"carbon12_EMPlusMEC_G18_02a_00_000_E_1_299_GeV_1M_master.root");
 //	xsec_Eventfile.push_back(PathToSimSamples+"carbon12_EMPlusMEC_G18_02a_00_000_E_1_501_GeV_1M_master.root");
 //	xsec_Eventfile.push_back(PathToSimSamples+"carbon12_EMPlusMEC_G18_02a_00_000_E_1_930_GeV_1M_master.root");
@@ -261,7 +261,7 @@ void extract_xsec() {
 			CurrentLatexTitle[WhichAngle]->SetTextFont(FontStyle);
 			CurrentLatexTitle[WhichAngle]->SetTextSize(TextSize);
 
-			CurrentLeg.push_back(new TLegend(0.5,0.8,0.67,0.89));
+			CurrentLeg.push_back(new TLegend(0.38,0.74,0.74,0.88));
 
 			CurrentCan.push_back(new TCanvas(ToString(angle[WhichAngle]),ToString(angle[WhichAngle]),205,34,1024,768));
 
@@ -283,7 +283,7 @@ void extract_xsec() {
 
 			DataTree->Draw("v>>hData"+ ToString(angle[WhichAngle]),"(E == "+ToString(Energy)+" && Z == "+ToString(Z)
 				+" && A == "+ToString(A)+" && abs(theta - "+ToString(angle[WhichAngle])
-				+") < "+ToString(ThetaCut)+")*xsec/1e3");
+				+") < "+ToString(ThetaCut)+")*xsec");
 
 			double DataIntegral = DataGraph->GetHistogram()->GetMaximum();
 
@@ -323,15 +323,15 @@ void extract_xsec() {
 
 			DataGraph->Draw("ap");
 			
-			/*TString OutputFileString = "./"+TString(target)+ToString(A)+"_E_"+EnergyString+"_theta_"+angleString[WhichAngle]+".root";
+			TString OutputFileString = "./"+TString(target)+ToString(A)+"_E_"+EnergyString+"_theta_"+angleString[WhichAngle]+".root";
 			TFile* OutputFile = new TFile(OutputFileString,"recreate");
 			OutputFile->cd();
-			DataGraph->Write("Data");*/		
+			DataGraph->Write("Data");	
 
 			// ---------------------------------------------------------------------------------------------
 
 			// Simulation
-/*
+
 			SimulationFile[WhichSimFile]->cd();
 			TDirectory * dir = (TDirectory*)SimulationFile[WhichSimFile]->Get(dirname);
 
@@ -441,21 +441,12 @@ void extract_xsec() {
 				}	
 
 			}
-*/
+
 			// Plot the data graph again so that the points are on top of the genie breakdown lines
 
 			DataGraph->Draw("p");
 
-			// ---------------------------------------------------------------------------------------------
-
-			CurrentLatexTitle[WhichAngle]->Draw();
-
-			// Export as pdf
-
-			TString NamePlot = "Overlay_"+target+"_E_"+EnergyString+"_theta_"+angleString[WhichAngle];
-			CurrentCan[WhichAngle]->SaveAs("./"+NamePlot+".pdf");
-
-		    //---------------------------//			
+			// ---------------------------------------------------------------------------------------------	
 		
 			TFile* f = TFile::Open("achilles_mc_electrons_2p.root","readonly");
 			TH1D* h = (TH1D*)(f->Get("cc2p"));
@@ -470,15 +461,39 @@ void extract_xsec() {
 
 			CurrentLeg[WhichAngle]->SetBorderSize(0);
 			CurrentLeg[WhichAngle]->SetNColumns(3);
-			CurrentLeg[WhichAngle]->SetColumnSeparation(2.);
+			CurrentLeg[WhichAngle]->SetColumnSeparation(1.);
 			CurrentLeg[WhichAngle]->SetTextFont(FontStyle);
 			CurrentLeg[WhichAngle]->SetTextSize(TextSize);
 
 			CurrentLeg[WhichAngle]->AddEntry(DataGraph,"Data","lep");
 
-			TLegendEntry* lMC = CurrentLeg[WhichAngle]->AddEntry(h,"2p prediction","l");
+			TLegendEntry* lMC = CurrentLeg[WhichAngle]->AddEntry(h,"2p pred","l");
 			lMC->SetTextColor(kRed);	
-			CurrentLeg[WhichAngle]->Draw();			
+			CurrentLeg[WhichAngle]->Draw();		
+
+			//---------------------------//	
+			
+			TFile* f_hack = TFile::Open("nuisance/nuisance_output.root","readonly");
+			TH1D* h_hack = (TH1D*)(f_hack->Get("energy_transfer_plot"));
+
+			CurrentCan[WhichAngle]->cd();
+			h_hack->SetLineColor(kOrange+7);
+			h_hack->SetLineWidth(4);			
+			h_hack->Scale(1e3);			
+			h_hack->Draw("hist c same");	
+			
+			TLegendEntry* lhack = CurrentLeg[WhichAngle]->AddEntry(h_hack,"2p GENIE hack","l");
+			lhack->SetTextColor(kOrange + 7);	
+			CurrentLeg[WhichAngle]->Draw();				
+
+			//---------------------------//					
+
+			CurrentLatexTitle[WhichAngle]->Draw();
+
+			// Export as pdf
+
+			TString NamePlot = "Overlay_"+target+"_E_"+EnergyString+"_theta_"+angleString[WhichAngle];
+			CurrentCan[WhichAngle]->SaveAs("./"+NamePlot+".pdf");			
 
 		    //---------------------------//			
 

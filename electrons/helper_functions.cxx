@@ -6,8 +6,26 @@
 #include <sstream>
 #include <cmath>
 #include <vector>
+#include <fstream>
+#include <limits>
 
 using namespace std;
+
+//---------------------------//
+
+std::fstream& GotoLine(std::fstream& file, unsigned int num){
+
+    file.seekg(std::ios::beg);
+
+    for(int i=0; i < (int)(num - 1); ++i){
+
+        file.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+
+    }
+
+    return file;
+
+}
 
 //---------------------------//
 
@@ -15,6 +33,21 @@ bool is_integer(double k){
 
   return std::floor(k) == k;
 
+}
+
+//---------------------------//
+
+std::vector<std::string> split_line (const std::string &s, char delim) {
+
+  std::vector<std::string> result;
+  std::stringstream ss (s);
+  std::string item;
+
+  while (getline (ss, item, delim)) {
+      result.push_back (item);
+  }
+
+  return result;
 }
 
 //---------------------------//

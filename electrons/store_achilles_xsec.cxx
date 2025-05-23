@@ -19,169 +19,136 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "helper_functions.cxx"
+//#include "helper_functions.cxx"
 
 using namespace std;
 
 //---------------------------//
 
-void store_achilles_xsec() {
+
+std::vector<std::string> split (const std::string &s, char delim) {
+    std::vector<std::string> result;
+    std::stringstream ss (s);
+    std::string item;
+
+    while (getline (ss, item, delim)) {
+        result.push_back (item);
+    }
+
+    return result;
+}
+
+struct Event {
+        // 6 lines * 5 values per line = 30 doubles total
+        std::vector<double> inlep;
+        std::vector<double> outlep;
+        std::vector<double> inhad1;
+        std::vector<double> outhad1;
+        std::vector<double> inhad2;
+        std::vector<double> outhad2;   // 6 lines each with 5 doubles
+        double wgt;        // the single double on the 7th line
+        double omega;
+    };
+
+
+int store_achilles_xsec() {
 
   //---------------------------//
 
   // I/O files
 
   TFile *f = new TFile("achilles_mc_electrons_2p.root" ,"recreate");
-  ifstream input("test_FG_961_37p00_2_an1_jtot_formatted.out");
+  ifstream inFile("test_FG_961_37p00_2_an1_jtot_formatted.out");
 
   //---------------------------//
 
   // variables & vectors
 
-  double xsec_sum = 0.;
-  double tot_xsec = 0.; // mbarns, so needs convertion to μbarns
-  int number_of_lines = 0;  
-  string line;
+  double sum_wgts = 0.;
+  double tot_xsec = 0.; //Actually already in nb/sr
 
-  vector<double> xsec;
-
-  vector<double> init_lepton_energy;
-  vector<double> final_lepton_energy;  
-
-  vector<double> init_lead_nucleon_energy;
-  vector<double> final_lead_nucleon_energy;   
-
-  vector<double> init_recoil_nucleon_energy;
-  vector<double> final_recoil_nucleon_energy;  
-
-  //---------------------------//  
-
-  // loop over the file
-
-  while ( std::getline(input, line) ) { 
-
-//if (number_of_lines > 23) {break;}
-
-    //---------------------------//
-
-    ++number_of_lines; 
-    vector<string> words = split (line," ");
-
-    //---------------------------//    
-
-    // first line is the total xsec
-
-    if (number_of_lines == 1) { 
-      
-      tot_xsec = strtod(words[0].c_str(),NULL); 
-      //cout << "tot_xsec = " << tot_xsec << endl;
-    
-    } 
-
-    //---------------------------//
-
-    // then we have blocks of seven
-
-    // 1st line in block is incoming probe 
-
-    if ( number_of_lines == 2 || (number_of_lines > 7 && is_integer((number_of_lines-2)/7.) ) ) {
-
-      init_lepton_energy.push_back( strtod(words[0].c_str(),NULL)/1e3 ); //GeV
-      //cout << "line # = " << number_of_lines << " init_lepton_energy = " << init_lepton_energy.back() << endl;
-
-    }
-
-    //---------------------------//  
- 
-    if ( number_of_lines == 3 || (number_of_lines > 7 && is_integer((number_of_lines-3)/7.) ) ) {
-
-      final_lepton_energy.push_back( strtod(words[0].c_str(),NULL)/1e3 ); //GeV
-      //cout << "line # = " << number_of_lines << " final_lepton_energy = " << final_lepton_energy.back() << endl;
-
-    }    
-    
-    //---------------------------//      
-
-    if ( number_of_lines == 4 || (number_of_lines > 7 && is_integer((number_of_lines-4)/7.) ) ) {
-
-      init_lead_nucleon_energy.push_back( strtod(words[0].c_str(),NULL)/1e3 ); //GeV
-      //cout << "line # = " << number_of_lines << " init_lead_nucleon_energy = " << init_lead_nucleon_energy.back() << endl;
-
-    }  
-
-    //---------------------------//  
-
-    if ( number_of_lines == 5 || (number_of_lines > 7 && is_integer((number_of_lines-5)/7.) ) ) {
-
-      final_lead_nucleon_energy.push_back( strtod(words[0].c_str(),NULL)/1e3 ); //GeV
-      //cout << "line # = " << number_of_lines << " final_lead_nucleon_energy = " << final_lead_nucleon_energy.back() << endl;
-
-    }  
-
-    //---------------------------//  
-
-    if ( number_of_lines == 6 || (number_of_lines > 7 && is_integer((number_of_lines-6)/7.) ) ) {
-
-      init_recoil_nucleon_energy.push_back( strtod(words[0].c_str(),NULL)/1e3 ); //GeV
-      //cout << "line # = " << number_of_lines << " init_recoil_nucleon_energy = " << init_recoil_nucleon_energy.back() << endl;
-
-    }  
-
-    //---------------------------//  
- 
-    if ( number_of_lines == 7 || (number_of_lines > 7 && is_integer((number_of_lines-7)/7.) ) ) {
-
-      final_recoil_nucleon_energy.push_back( strtod(words[0].c_str(),NULL)/1e3 ); //GeV
-      //cout << "line # = " << number_of_lines << " final_recoil_nucleon_energy = " << final_recoil_nucleon_energy.back() << endl;
-
-    }      
-    
-    //---------------------------// 
-
-    if ( number_of_lines == 8 || (number_of_lines > 7 && is_integer((number_of_lines-8)/7.) ) ) {
-
-      xsec_sum += strtod(words[0].c_str(),NULL);
-      xsec.push_back( strtod(words[0].c_str(),NULL) / (1e6) ); // MeV -> GeV, mb->μb
-      //cout << "line # = " << number_of_lines << " xsec = " << xsec.back() << endl;
-
-    }      
-    
-    //---------------------------//     
-
+  // 1) Read the very first line as a double
+  if (!(inFile >> tot_xsec)) {
+      std::cerr << "Unable to read the first line as a double.\n";
+      return 1;
   }
 
-  std::cout << "Number of lines in text file: " << number_of_lines << endl;
+  //tot_xsec *= 1.e3;//Convert to per GeV
+
+  std::vector<Event> Events;
+
+  while (true) {
+    Event event;
+    event.inlep.resize(5);
+    event.outlep.resize(5);
+    event.inhad1.resize(5);
+    event.outhad1.resize(5);
+    event.inhad2.resize(5);
+    event.outhad2.resize(5);
+
+  // A helper array to iterate easily
+    std::vector<double>* lines[] = {
+        &event.inlep, &event.outlep, &event.inhad1,
+        &event.outhad1, &event.inhad2, &event.outhad2
+    };
+
+    bool readSuccess = true;
+        for (int i = 0; i < 6; ++i) {
+            for (int j = 0; j < 5; ++j) {
+                if (!(inFile >> (*lines[i])[j])) {
+                    // If we fail to read enough values, we stop
+                    readSuccess = false;
+                    break;
+                }
+            }
+            if (!readSuccess) break;
+        }
+        if (!readSuccess) break;  // no more complete blocks
+
+    // 3) Read the 7th line (single double)
+    double xsec = 0.0;
+    if (!(inFile >> xsec)) {
+        // If we cannot read the seventh line, we stop
+        break;
+    }
+    event.wgt = xsec;
+    event.omega = (event.inlep.at(0) - event.outlep.at(0))/1000.; //convert to GeV
+    sum_wgts += event.wgt;
+
+    // Store the fully read event
+    Events.push_back(event);
+}
 
   //---------------------------//
 
-  int nbins = xsec.size();
-  cout << "nbins = " << nbins << endl;
-  vector<double> omega; omega.resize(nbins);
-  vector<double> diff_xsec; diff_xsec.resize(nbins);    
+  int nevents = Events.size();
 
-  int hbins = 20;
-  double min = 0.; double max = 0.7;
+  int hbins = 30;
+  double min = 0.; double max = 0.9;
   TH1D* h = new TH1D("cc2p",";energy transfer",hbins,min,max);  
 
-  for (int i = 0; i < nbins; i++) {
+  for (int i = 0; i < nevents; i++) {
 
-    omega.at(i) = init_lepton_energy.at(i) - final_lepton_energy.at(i);
-    //cout << "i bin, omega = " << omega.at(i) << endl;
-    diff_xsec.at(i) = xsec.at(i) * (tot_xsec / xsec_sum) / (2*TMath::Pi());
-    //cout << "i bin, xsec = " << diff_xsec.at(i) << endl << endl;    
+    double omega = Events.at(i).omega;
+    double wgt = Events.at(i).wgt;
 
-    h->Fill(omega.at(i),diff_xsec.at(i));
+
+    h->Fill(omega,wgt);
 
   }
+  std::cout << "Bin width = " << h->GetBinWidth(2) << "\n";
+  std::cout << "tot xsec = " << tot_xsec << "\n";
+
+  //This factor of 4 is due to an issue in my theory code, will fix
+  h->Scale(tot_xsec/4./(2*TMath::Pi() * sum_wgts * h->GetBinWidth(2))/1e6); // MeV->GeV
 
   // bin width division
-  divide_bin_width(h);
-  // per carbon nucleus ( A = 12)
-  h->Scale(1/12.);
-  //h->Draw();  
+  h->Draw();  
 
   f->cd();
   h->Write();
   f->Close();
+  return 1;
  
 }
+
