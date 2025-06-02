@@ -75,13 +75,15 @@ void FlatTree_VARS::Loop() {
 
    // scaling to get xsecs
 
-   double tot_xsec = 16717197.; // nb/sr
+   //double tot_xsec = 16717197.; // nb/sr
+   //// code issue, Noah needs to fix it
+   //energy_transfer_plot->Scale(1./4.); 
+
+   double tot_xsec = 2468007.; // nb/sr   
 
    divide_bin_width(energy_transfer_plot);
    energy_transfer_plot->Scale(tot_xsec / (2.*TMath::Pi() * nentries) /1e6 ); // MeV->GeV
 
-   // code issue, Noah needs to fix it
-   energy_transfer_plot->Scale(1./4.);
 
    // opening angle correction
    //double delta_angle = TMath::Abs( cos( (angle_cv + open_angle) *TMath::Pi() / 180.) - cos( (angle_cv - open_angle) *TMath::Pi() / 180.) );

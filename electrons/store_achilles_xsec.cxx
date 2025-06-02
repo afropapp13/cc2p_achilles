@@ -58,8 +58,9 @@ int store_achilles_xsec() {
   // I/O files
 
   TFile *f = new TFile("achilles_mc_electrons_2p.root" ,"recreate");
-  ifstream inFile("test_FG_961_37p00_2_an1_jtot_formatted.out");
-
+  //ifstream inFile("test_FG_961_37p00_2_an1_jtot_formatted.out");
+  ifstream inFile("test_FG_961_37p50.out");
+  
   //---------------------------//
 
   // variables & vectors
@@ -139,8 +140,10 @@ int store_achilles_xsec() {
   std::cout << "Bin width = " << h->GetBinWidth(2) << "\n";
   std::cout << "tot xsec = " << tot_xsec << "\n";
 
-  //This factor of 4 is due to an issue in my theory code, will fix
-  h->Scale(tot_xsec/4./(2*TMath::Pi() * sum_wgts * h->GetBinWidth(2))/1e6); // MeV->GeV
+  ////This factor of 4 is due to an issue in my theory code, will fix
+  //h->Scale(tot_xsec/4./(2*TMath::Pi() * sum_wgts * h->GetBinWidth(2))/1e6); // MeV->GeV
+
+  h->Scale(tot_xsec/(2*TMath::Pi() * sum_wgts * h->GetBinWidth(2))/1e6); // MeV->GeV
 
   // bin width division
   h->Draw();  
