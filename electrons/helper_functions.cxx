@@ -1,4 +1,6 @@
 #include <TH1D.h>
+#include <TGraph.h>
+#include <TCanvas.h>
 
 #include <iostream>
 #include <iomanip>
@@ -8,8 +10,37 @@
 #include <vector>
 #include <fstream>
 #include <limits>
+#include <algorithm> // Required for std::max_element
 
 using namespace std;
+
+//---------------------------//
+
+const int text_font = 132;
+const double text_size = 0.06;
+const int ndivs = 6; 
+
+//---------------------------//
+
+TString int_to_string(int num) {
+
+	std::ostringstream start;
+	start << num;
+	string start1 = start.str();
+	return start1;
+  
+}
+
+//---------------------------//
+
+TString double_to_string(double num) {
+
+	std::ostringstream start;
+	start << num;
+	string start1 = start.str();
+	return start1;
+
+}
 
 //---------------------------//
 
