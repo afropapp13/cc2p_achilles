@@ -66,8 +66,8 @@ void FlatTreeAnalyzer::Loop() {
 	//----------------------------------------//
 
 	// Loop over the interaction processes
-	//for (int inte = 0; inte < NInte; inte++) {
-	for (int inte = 0; inte < 1; inte++) {
+	for (int inte = 0; inte < NInte; inte++) {
+	//for (int inte = 0; inte < 1; inte++) {
 
 	  //--------------------------------------------------//
 
@@ -227,7 +227,11 @@ void FlatTreeAnalyzer::Loop() {
 
 	    TrueDeltaPTPlot[0]->Fill(DeltaPT,weight);	
 	    TrueCosThetaMuSumPPlot[0]->Fill(costheta_mu_sump,weight);
-	    TrueCosThetaPLPRPlot[0]->Fill(costheta_pl_pr,weight);										
+	    TrueCosThetaPLPRPlot[0]->Fill(costheta_pl_pr,weight);		
+		
+	    TrueDeltaPTPlot[genie_mode]->Fill(DeltaPT,weight);	
+	    TrueCosThetaMuSumPPlot[genie_mode]->Fill(costheta_mu_sump,weight);
+	    TrueCosThetaPLPRPlot[genie_mode]->Fill(costheta_pl_pr,weight);			
 
 	  } // End of the post-FSI selection
 
@@ -251,6 +255,10 @@ void FlatTreeAnalyzer::Loop() {
 	std::cout << std::endl;
 
 	std::cout << std::endl << "------------------------------------------------" << std::endl << std::endl;
+
+	//----------------------------------------//	
+
+	// don't divide by the bin width bc we need to apply the reg matrix
 
 	//----------------------------------------//		
 

@@ -20,13 +20,13 @@ using namespace std;
 #include <fstream>
 #include <stdlib.h>
 
-void t2k_extract_xsec(TString var) {
+void icarus_extract_xsec(TString var) {
 
 	//--------------------//
 
 	// data file
 
-	TFile* data_file = TFile::Open("neutrino_t2k_data_files/"+var+"Results.root");
+	TFile* data_file = TFile::Open("neutrino_icarus_data_files/"+var+"Results.root");
 
 	TH1D* hdata = (TH1D*)(data_file->Get("Result"));
 	TH2D* cov = (TH2D*)(data_file->Get("Covariance"));
@@ -35,14 +35,15 @@ void t2k_extract_xsec(TString var) {
 
 	// mc file
 
-	TFile* mc_file = TFile::Open("mc_output_files/FlatTreeAnalyzerOutput_gibuu20251_soft_inmed_DS3_30.root");
+	TFile* mc_file = TFile::Open("mc_output_files/FlatTreeAnalyzerOutput_AR23.root");
 
 	TString h_name = "TrueDeltaPTPlot";
 	if (var == "dat") { h_name = "TrueDeltaAlphaTPlot"; }	
-	if (var == "dphit") { h_name = "TrueDeltaPhiTPlot"; }	
+	if (var == "cosmu") { h_name = "TrueMuonCosThetaPlot"; }	
+	if (var == "cosmup") { h_name = "TrueMuonProtonCosThetaPlot"; }			
 
 	TH1D* hmc = (TH1D*)(mc_file->Get(h_name));
-	double scale = 1e-39;	
+	double scale = 1e-39;
 
 	//--------------------//
 
@@ -148,8 +149,8 @@ void t2k_extract_xsec(TString var) {
 
 	// export as pdf
 
-	gPad->RedrawAxis();
-	TString NamePlot = "t2k_"+var;
+	gPad->RedrawAxis();	
+	TString NamePlot = "icarus_"+var;
 	c->SaveAs("pdf/"+NamePlot+".pdf");			
 
 } // end of the program

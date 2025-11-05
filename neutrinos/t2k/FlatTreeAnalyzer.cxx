@@ -222,6 +222,7 @@ std::vector< std::vector< int > > cosmu_cosp_1p_2d_bins =
           if(fOutputFile=="gibuu20251_soft_inmed_DS3_00") { weight=weight/60; }
           if(fOutputFile=="gibuu20251_soft_inmed_DS3_30") { weight=weight/60; }
           if(fOutputFile=="gibuu20251_soft_inmed_DS3_01") { weight=weight/38; }
+          
 	  //----------------------------------------//	
 
 

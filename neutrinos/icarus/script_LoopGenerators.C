@@ -4,8 +4,7 @@
 
 	//----------------------------------------//
 	
-	WhichSample.push_back("/exp/uboone/data/users/bbogart/t2k_ME_ODW_1_T0T0_soft_inmed_DS3_30_GiBUU2025/gibuu20251");WhichName.push_back("gibuu20251_soft_inmed_DS3_30");
-
+	WhichSample.push_back("/pnfs/uboone/persistent/users/apapadop/GENIETweakedSamples/noah_t2k_all_interactions/icarus_numi_fhc");WhichName.push_back("AR23");
 
 	//----------------------------------------//
 
@@ -16,5 +15,6 @@
 		gROOT->ProcessLine("FlatTreeAnalyzer(\""+WhichSample[i]+"\",\""+WhichName[i]+"\").Loop()");
 
 	}
-	//gROOT->ProcessLine(".q");
+
+	gROOT->ProcessLine(".q");
 };

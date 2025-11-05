@@ -3,7 +3,8 @@
 
 	//----------------------------------------//
 			
-	WhichSample.push_back("/pnfs/uboone/persistent/users/mastbaum/tuning2022/mc/bnb_ub/flat/bnb.ub.num.genie_v3_00_06.flat.root"); WhichName.push_back("GENIE_v3_0_6");			 
+	WhichSample.push_back("/pnfs/uboone/persistent/users/apapadop/GENIETweakedSamples/v3_4_2_AR23_20i_00_000_CC/14_1000180400_CC_v3_4_2_AR23_20i_00_000.flat.root"); WhichName.push_back("AR23");	
+			 
 	//----------------------------------------//
 
 	gROOT->ProcessLine(".L FlatTreeAnalyzer.cxx+");
