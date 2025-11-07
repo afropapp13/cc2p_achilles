@@ -1,0 +1,5 @@
+#run tyhe generators and apply signal def
+root -b script_LoopGenerators.C
+
+#overlay mc on top of data
+root -b run_t2k.cxx

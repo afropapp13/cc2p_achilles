@@ -4,7 +4,7 @@
 
 	//----------------------------------------//
 	
-	WhichSample.push_back("/pnfs/uboone/persistent/users/apapadop/GENIETweakedSamples/noah_t2k_all_interactions/14_1000060120_CC_v3_6_0_AR23_20i_00_000.flat.root");WhichName.push_back("AR23");
+	WhichSample.push_back("/pnfs/uboone/persistent/users/apapadop/GENIETweakedSamples/noah_minerva_all_interactions/NuMILE_FHC_numu_C8H8_GENIEv3_AR23_20i_00_000_1M_0000_NUISFLAT.root");WhichName.push_back("AR23");
 
 	//----------------------------------------//
 
@@ -17,5 +17,4 @@
 	}
 	
 	gROOT->ProcessLine(".q");
-
 };

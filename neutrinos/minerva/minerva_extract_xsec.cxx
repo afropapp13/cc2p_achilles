@@ -20,16 +20,21 @@ using namespace std;
 #include <fstream>
 #include <stdlib.h>
 
-void t2k_extract_xsec(TString var) {
+void minerva_extract_xsec(TString var) {
 
 	//--------------------//
 
+	gStyle->SetOptStat(0);
+
+	//--------------------//	
+
 	// data file
 
-	TFile* data_file = TFile::Open("neutrino_t2k_data_files/"+var+"Results.root");
+	TFile* data_file = TFile::Open("neutrino_minerva_data_files/MINERvA_DataRelease_Updated.root");
 
-	TH1D* hdata = (TH1D*)(data_file->Get("Result"));
-	TH2D* cov = (TH2D*)(data_file->Get("Covariance"));
+	TList* var_list = (TList*) data_file->Get(var);
+	TH1D* hdata = (TH1D*) var_list->At(0);
+	TH2D* cov   = (TH2D*) var_list->At(2);
 
 	//--------------------//
 
@@ -42,7 +47,7 @@ void t2k_extract_xsec(TString var) {
 	if (var == "dphit") { h_name = "TrueDeltaPhiTPlot"; }	
 
 	TH1D* hmc = (TH1D*)(mc_file->Get(h_name));
-	double scale = 1e-39;	
+	double scale = 1e-39;
 
 	//--------------------//
 
@@ -129,39 +134,23 @@ void t2k_extract_xsec(TString var) {
 
 	// new 2p2h model
 
-	TFile* f_new2p2h = TFile::Open("mc_output_files/gst_analyzerOutput_noah_2p2h.root");
-	TH1D* h_new2p2h = (TH1D*)(f_new2p2h->Get(h_name));
-	h_new2p2h->SetLineColor(kRed);
-	h_new2p2h->SetLineWidth(3);
-	h_new2p2h->Scale(scale);
-	h_new2p2h->Scale(1e3);// rm! is there a chance that we have 3 orders of magnitude difference from the flux folding?
-	h_new2p2h->Draw("hist same");
-
-	// for (int i = 1; i <= h_new2p2h->GetNbinsX(); ++i) {
-	// 	double low = h_new2p2h->GetBinLowEdge(i);
-	// 	double high = h_new2p2h->GetBinLowEdge(i+1);
-	// 	double val = h_new2p2h->GetBinContent(i);
-	// 	cout << Form("[%.3e, %.3e): %.3e", low, high, val) << endl;
-	// }
-
 	//---------------------------//	
 	
 	// legend
 
-	TLegend* leg = new TLegend(0.25,0.91,0.95,0.98);
+	TLegend* leg = new TLegend(0.35,0.91,0.95,0.98);
 	leg->SetBorderSize(0);
 	leg->SetTextFont(text_font);
 	leg->SetTextSize(0.04);
 	leg->SetNColumns(4);	
 
-	leg->AddEntry(hdata,"T2K Data","ep");
+	leg->AddEntry(hdata,"MINERVA Data","ep");
 	leg->AddEntry(h_inte.at(0),"QE","l");
 	leg->AddEntry(h_inte.at(1),"MEC","l");
 	leg->AddEntry(h_inte.at(2),"RES","l");
 	leg->AddEntry(h_inte.at(3),"DIS","l");	
 	leg->AddEntry(h_inte.at(4),"COH","l");	
 	leg->AddEntry(clone_mec,"default MEC","l");
-	leg->AddEntry(h_new2p2h,"new 2p2h model (x1e3)","l");
 	leg->Draw();
 
 	//---------------------------//					
@@ -169,7 +158,7 @@ void t2k_extract_xsec(TString var) {
 	// export as pdf
 
 	gPad->RedrawAxis();
-	TString NamePlot = "t2k_"+var;
+	TString NamePlot = "minerva_"+var;
 	c->SaveAs("pdf/"+NamePlot+".pdf");			
 
 } // end of the program

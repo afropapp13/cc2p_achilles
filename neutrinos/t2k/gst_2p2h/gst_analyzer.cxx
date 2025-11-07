@@ -1,5 +1,5 @@
-#define FlatTreeAnalyzer_cxx
-#include "FlatTreeAnalyzer.h"
+#define gst_analyzer_cxx
+#include "gst_analyzer.h"
 
 #include <TH1D.h>
 #include <TFile.h>
@@ -26,7 +26,7 @@ int Get2Dbin(double value_row, double value_element, std::vector< std::vector<in
 
 //----------------------------------------//
 
-void FlatTreeAnalyzer::Loop() {
+void gst_analyzer::Loop() {
 
 	//----------------------------------------//	
 
@@ -34,17 +34,20 @@ void FlatTreeAnalyzer::Loop() {
 	Long64_t nentries = fChain->GetEntriesFast();
 	Long64_t nbytes = 0, nb = 0;
 
-	double Units = 1E39; // so that the extracted cross-section is in 10^{-38} cm^{2}
-	double A = 1.; // so that we can have xsecs per nucleon
-
 	int NInte = 6; // Interaction processes: All, QE, MEC, RES, DIS, COH
 	std::vector<TString> InteractionLabels = {"","QE","MEC","RES","DIS","COH"};
+
+  // from Noah's out file header in mub/sr
+  // 10^-6 included for GeV->MeV conversion
+  // multiply by 10^9 to get from mub (10^-30) to 10^-39 cm^2   
+  // make it per nucleon (1/12 for C12)
+  double tot_xsec = 7.1635465068697360E-6 * 1e-6 * 1e9 * (1./12.);
 
 	//----------------------------------------//	
 
   // Output file
 
-	TString FileNameAndPath = "mc_output_files/FlatTreeAnalyzerOutput_"+fOutputFile+".root";
+	TString FileNameAndPath = "../mc_output_files/gst_analyzerOutput_"+fOutputFile+".root";
 	TFile* file = new TFile(FileNameAndPath,"recreate");
 
 	std::cout << std::endl << "------------------------------------------------" << std::endl << std::endl;
@@ -183,14 +186,9 @@ void FlatTreeAnalyzer::Loop() {
 
 	  //----------------------------------------//	
 		
-	  double weight = fScaleFactor*Units*A*Weight;	
+	  double weight = wght;	
 
 	  //----------------------------------------//	
-
-	  // Signal definition
-
-	  if (PDGLep != 13) { continue; } // make sure that we have only a muon in the final state
-	  if (cc != 1) { continue; } // make sure that we have only CC interactions		
 
     TotalXs += weight;
 
@@ -201,62 +199,49 @@ void FlatTreeAnalyzer::Loop() {
     double Pp = 0;
     double CosP = -999;
 
-    TVector3 Muon3Vector(0,0,0);
-    double Pmu = 0;
+    TVector3 Muon3Vector(pxl,pyl,pzl);
+    double Pmu = Muon3Vector.Mag();	
+    double CosLep = Muon3Vector.CosTheta();
 
-	  vector <int> ProtonID; ProtonID.clear();
-	  vector <int> MuonID; MuonID.clear();		
-
-	  // Example selection with CC1p0pi (units in GeV/c)
 	  // Loop over final state particles
 
-	  for (int i = 0; i < nfsp; i++) {
+	  for (int i = 0; i < nf; i++) {
 		
-	    double pf = TMath::Sqrt( px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i]);
+	    double pf = TMath::Sqrt( pxf[i]*pxf[i] + pyf[i]*pyf[i] + pzf[i]*pzf[i]);
 
-	    if (pdg[i] == 13) {
-
-	      MuonTagging ++;
-	      MuonID.push_back(i);
-        Pmu = pf;
-        Muon3Vector.SetXYZ(px[i],py[i],pz[i]);
-
-	    }
-
-	    if (pdg[i] == 2212 && pf > 0.5 ) {
+	    if (pdgf[i] == 2212 && pf > 0.5 ) {
 
 	      ProtonTagging ++;
-	      ProtonID.push_back(i);
 
 	    }
       
       // for TKI
-      if (pdg[i] == 2212) {
+      if (pdgf[i] == 2212) {
       
         ProtonTaggingTKI++;
-        if (pf > Pp) { Pp=pf; CosP=pz[i]/pf; P3Vector.SetXYZ(px[i],py[i],pz[i]);}
+        if (pf > Pp) { Pp=pf; CosP=pzf[i]/pf; P3Vector.SetXYZ(pxf[i],pyf[i],pzf[i]);}
       
       }
 
-	    if (fabs(pdg[i]) == 211)  {
+	    if (fabs(pdgf[i]) == 211)  {
 
 	      ChargedPionTagging ++;
 
 	    }
 
-	    if (pdg[i] == 111)  {
+	    if (pdgf[i] == 111)  {
 
 	      NeutralPionTagging ++;
 
 	    }
 
-	    if (fabs(pdg[i]) == 11)  {
+	    if (fabs(pdgf[i]) == 11)  {
 
 	      ElectronTagging ++;
 
 	    }
 
-	    if (fabs(pdg[i]) == 22)  {
+	    if (fabs(pdgf[i]) == 22)  {
 
 	      PhotonTagging ++;
 
@@ -268,8 +253,9 @@ void FlatTreeAnalyzer::Loop() {
 
     bool flag_0pi = false;
     bool flag_tki = false;
-	  if (ChargedPionTagging == 0 && NeutralPionTagging == 0 && MuonTagging ==1) { flag_0pi=true; }
-    if (ChargedPionTagging == 0 && NeutralPionTagging == 0 && MuonTagging == 1 && Pmu>0.25 && CosLep>-0.6 && Pp>0.45 && Pp<1 && CosP>0.4) { flag_tki=true; }
+    // the muon is already included
+	  if (ChargedPionTagging == 0 && NeutralPionTagging == 0) { flag_0pi=true; }
+    if (ChargedPionTagging == 0 && NeutralPionTagging == 0 && Pmu>0.25 && CosLep>-0.6 && Pp>0.45 && Pp<1 && CosP>0.4) { flag_tki=true; }
 
 	  //----------------------------------------//	
 
@@ -282,15 +268,11 @@ void FlatTreeAnalyzer::Loop() {
       TotalXs0pi+=weight;
       CounterEventsPassedSelection++;
 
-	    if (TMath::Abs(Mode) == 1) { CounterQEEventsPassedSelection++; genie_mode = 1; } // QE
-	    else if (TMath::Abs(Mode) == 2) { CounterMECEventsPassedSelection++; genie_mode = 2; } // MEC
-	    else if (
-		   TMath::Abs(Mode) == 10 ||
-		   TMath::Abs(Mode) == 11 || TMath::Abs(Mode) == 12 || TMath::Abs(Mode) == 13 ||
-		   TMath::Abs(Mode) == 17 || TMath::Abs(Mode) == 22 || TMath::Abs(Mode) == 23
-	  	   ) { CounterRESEventsPassedSelection++; genie_mode = 3; } // RES
-	    else if (TMath::Abs(Mode) == 21 || TMath::Abs(Mode) == 26) { CounterDISEventsPassedSelection++; genie_mode = 4; } // DIS
-	    else if (TMath::Abs(Mode) == 16) { CounterCOHEventsPassedSelection++; genie_mode = 5;} // COH
+	    if (qel) { CounterQEEventsPassedSelection++; genie_mode = 1; } // QE
+	    else if (mec) { CounterMECEventsPassedSelection++; genie_mode = 2; } // MEC
+	    else if (res) { CounterRESEventsPassedSelection++; genie_mode = 3; } // RES
+	    else if (dis) { CounterDISEventsPassedSelection++; genie_mode = 4; } // DIS
+	    else if (coh) { CounterCOHEventsPassedSelection++; genie_mode = 5;} // COH
 	    else { genie_mode = 3; }  
           
     }
@@ -557,6 +539,10 @@ void FlatTreeAnalyzer::Loop() {
     Reweight(TrueDeltaPTPlot[inte]);
     Reweight(TrueDeltaAlphaTPlot[inte]);
 
+    TrueDeltaPTPlot[inte]->Scale(tot_xsec/TotalXs);
+    TrueDeltaAlphaTPlot[inte]->Scale(tot_xsec/TotalXs);    
+    TrueDeltaPhiTPlot[inte]->Scale(tot_xsec/TotalXs);
+
     Reweight2d(SerialCosMuPmu0pPlot[inte],cosmu_pmu_0p_2d_bins,cosmu_0p_bins,pmu_0p_bins,1);
     Reweight2d(SerialCosMuCosp1pPlot[inte],cosmu_cosp_1p_2d_bins,cosmu_1p_bins,cosp_1p_bins,1);
 
@@ -577,214 +563,6 @@ void FlatTreeAnalyzer::Loop() {
 	std::cout << "TotalXs: "<<TotalXs<<std::endl;
   std::cout << "TotalXs0pi: "<<TotalXs0pi<<std::endl;
   std::cout << "TotalXsTKI: "<<TotalXsTKI<<std::endl;
-  std::cout<<std::endl;
-
-  std::cout << "Full"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<Full[0]->GetNbinsX(); i++){
-  
-    if (i==0) std::cout << Full[0]->GetBinContent(i+1);
-    else std::cout << ", " << Full[0]->GetBinContent(i+1);
-
-  }
-  
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl;
-
-  std::cout << "TruePmultPlot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<TruePmultPlot[0]->GetNbinsX(); i++){
-  
-    if (i==0) std::cout << TruePmultPlot[0]->GetBinContent(i+1);
-    else std::cout << ", " << TruePmultPlot[0]->GetBinContent(i+1);
-  
-  }
-  
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl; 
-
-  std::cout << "TrueMuonCosTheta1pPlot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<TrueMuonCosTheta1pPlot[0]->GetNbinsX(); i++){
-  
-    if (i==0) std::cout << TrueMuonCosTheta1pPlot[0]->GetBinContent(i+1);
-    else std::cout << ", " << TrueMuonCosTheta1pPlot[0]->GetBinContent(i+1);
-  
-  }
-  
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl;
-	
-  std::cout << "TrueMuonCosTheta0pPlot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<TrueMuonCosTheta0pPlot[0]->GetNbinsX(); i++){
-  
-    if (i==0) std::cout << TrueMuonCosTheta0pPlot[0]->GetBinContent(i+1);
-    else std::cout << ", " << TrueMuonCosTheta0pPlot[0]->GetBinContent(i+1);
-
-  }
-
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl;
-
-  std::cout << "TrueDeltaPTPlot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<TrueDeltaPTPlot[0]->GetNbinsX(); i++){
-  
-    if (i==0) std::cout << TrueDeltaPTPlot[0]->GetBinContent(i+1);
-    else std::cout << ", " << TrueDeltaPTPlot[0]->GetBinContent(i+1);
-  
-  }
-  
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl;
-
-  std::cout << "TrueDeltaAlphaTPlot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<TrueDeltaAlphaTPlot[0]->GetNbinsX(); i++){
-  
-    if (i==0) std::cout << TrueDeltaAlphaTPlot[0]->GetBinContent(i+1);
-    else std::cout << ", " << TrueDeltaAlphaTPlot[0]->GetBinContent(i+1);
-  
-  }
-  
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl;
-
-  std::cout << "TrueDeltaPhiTPlot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<TrueDeltaPhiTPlot[0]->GetNbinsX(); i++){
-  
-    if (i==0) std::cout << TrueDeltaPhiTPlot[0]->GetBinContent(i+1);
-    else std::cout << ", " << TrueDeltaPhiTPlot[0]->GetBinContent(i+1);
-  
-  }
-  
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl;
-
-  std::cout << "SerialCosMuPmu0pPlot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<SerialCosMuPmu0pPlot[0]->GetNbinsX(); i++){
-  
-    if (i==0) std::cout << SerialCosMuPmu0pPlot[0]->GetBinContent(i+1);
-    else std::cout << ", " << SerialCosMuPmu0pPlot[0]->GetBinContent(i+1);
-  
-  }
-  
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl;
-
-  std::cout << "TruePp1Plot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<TruePp1Plot[0]->GetNbinsX(); i++){
-            
-    if (i==0) std::cout << TruePp1Plot[0]->GetBinContent(i+1);
-    else std::cout << ", " << TruePp1Plot[0]->GetBinContent(i+1);
-    
-  }
-  
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl;
-
-  std::cout << "TruePp2Plot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<TruePp2Plot[0]->GetNbinsX(); i++){
-  
-    if (i==0) std::cout << TruePp2Plot[0]->GetBinContent(i+1);
-    else std::cout << ", " << TruePp2Plot[0]->GetBinContent(i+1);
-  
-  }
-  
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl;
-
-  std::cout << "TruePp3Plot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<TruePp3Plot[0]->GetNbinsX(); i++){
-  
-    if (i==0) std::cout << TruePp3Plot[0]->GetBinContent(i+1);
-    else std::cout << ", " << TruePp3Plot[0]->GetBinContent(i+1);
-  
-  }
-  
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl;
-
-  std::cout << "TruePp4Plot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<TruePp4Plot[0]->GetNbinsX(); i++){
-  
-    if (i==0) std::cout << TruePp4Plot[0]->GetBinContent(i+1);
-    else std::cout << ", " << TruePp4Plot[0]->GetBinContent(i+1);
-  
-  }
-  
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl;
-
-  std::cout << "TrueCosp1Plot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<TrueCosp1Plot[0]->GetNbinsX(); i++){
-  
-    if (i==0) std::cout << TrueCosp1Plot[0]->GetBinContent(i+1);
-    else std::cout << ", " << TrueCosp1Plot[0]->GetBinContent(i+1);
-  
-  }
-  
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl;
-
-  std::cout << "TrueCosp2Plot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<TrueCosp2Plot[0]->GetNbinsX(); i++){
-            
-    if (i==0) std::cout << TrueCosp2Plot[0]->GetBinContent(i+1);
-    else std::cout << ", " << TrueCosp2Plot[0]->GetBinContent(i+1);
-    
-  }
-  
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl;
-
-  std::cout << "TrueCosp3Plot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<TrueCosp3Plot[0]->GetNbinsX(); i++){
-  
-    if (i==0) std::cout << TrueCosp3Plot[0]->GetBinContent(i+1);
-    else std::cout << ", " << TrueCosp3Plot[0]->GetBinContent(i+1);
-  
-  }
-  
-  std::cout << "]" << std::endl;
-  std::cout<<std::endl;
-
-  std::cout << "TrueCosp4Plot"<<std::endl;;
-  std::cout << "y = [";
-  
-  for(int i=0; i<TrueCosp4Plot[0]->GetNbinsX(); i++){
-  
-    if (i==0) std::cout << TrueCosp4Plot[0]->GetBinContent(i+1);
-    else std::cout << ", " << TrueCosp4Plot[0]->GetBinContent(i+1);
-  
-  }
-  
-  std::cout << "]" << std::endl;
   std::cout<<std::endl;
 
 	file->cd();
@@ -867,6 +645,7 @@ void Reweight2d(TH1D* h, std::vector< std::vector<int> > BinEdgeVector, std::vec
 
 }
 
+//----------------------------------------//
 
 int Return2DNBins(std::vector< std::vector<int> > BinEdgeVector) {
 
@@ -885,6 +664,8 @@ int Return2DNBins(std::vector< std::vector<int> > BinEdgeVector) {
   return NBins;
 
 }
+
+//----------------------------------------//
 
 std::vector<double> Return2DBinIndices(std::vector< std::vector<int> > BinEdgeVector) {
 
