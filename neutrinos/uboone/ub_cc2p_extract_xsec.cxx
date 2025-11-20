@@ -166,7 +166,7 @@ void ub_cc2p_extract_xsec(TString var) {
 	leg->SetTextSize(0.04);
 	leg->SetNColumns(4);	
 
-	leg->AddEntry(hdata,"ICARUS Data","ep");
+	leg->AddEntry(hdata,"MicroBooNE Data","ep");
 	leg->AddEntry(h_inte.at(0),"QE","l");
 	leg->AddEntry(h_inte.at(1),"MEC","l");
 	leg->AddEntry(h_inte.at(2),"RES","l");

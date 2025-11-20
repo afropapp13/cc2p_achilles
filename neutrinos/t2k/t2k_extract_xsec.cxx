@@ -134,15 +134,7 @@ void t2k_extract_xsec(TString var) {
 	h_new2p2h->SetLineColor(kRed);
 	h_new2p2h->SetLineWidth(3);
 	h_new2p2h->Scale(scale);
-	h_new2p2h->Scale(1e3);// rm! is there a chance that we have 3 orders of magnitude difference from the flux folding?
 	h_new2p2h->Draw("hist same");
-
-	// for (int i = 1; i <= h_new2p2h->GetNbinsX(); ++i) {
-	// 	double low = h_new2p2h->GetBinLowEdge(i);
-	// 	double high = h_new2p2h->GetBinLowEdge(i+1);
-	// 	double val = h_new2p2h->GetBinContent(i);
-	// 	cout << Form("[%.3e, %.3e): %.3e", low, high, val) << endl;
-	// }
 
 	//---------------------------//	
 	
@@ -161,7 +153,7 @@ void t2k_extract_xsec(TString var) {
 	leg->AddEntry(h_inte.at(3),"DIS","l");	
 	leg->AddEntry(h_inte.at(4),"COH","l");	
 	leg->AddEntry(clone_mec,"default MEC","l");
-	leg->AddEntry(h_new2p2h,"new 2p2h model (x1e3)","l");
+	leg->AddEntry(h_new2p2h,"new 2p2h model","l");
 	leg->Draw();
 
 	//---------------------------//					

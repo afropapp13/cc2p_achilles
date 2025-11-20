@@ -37,11 +37,12 @@ void gst_analyzer::Loop() {
 	int NInte = 6; // Interaction processes: All, QE, MEC, RES, DIS, COH
 	std::vector<TString> InteractionLabels = {"","QE","MEC","RES","DIS","COH"};
 
-  // from Noah's out file header in mub/sr
+  // Noah's output file header is in nb/sr
+  // 1e3 for nb to mub
   // 10^-6 included for GeV->MeV conversion
   // multiply by 10^9 to get from mub (10^-30) to 10^-39 cm^2   
   // make it per nucleon (1/12 for C12)
-  double tot_xsec = 7.1635465068697360E-6 * 1e-6 * 1e9 * (1./12.);
+  double tot_xsec = 7.1635465068697360E-6 * 1e3 * 1e-6 * 1e9 * (1./12.);
 
 	//----------------------------------------//	
 
